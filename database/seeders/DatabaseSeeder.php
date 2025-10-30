@@ -13,12 +13,17 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Crear usuario administrador
-        User::create([
-            'name' => 'Administrador',
-            'email' => 'admin@donajulia.com',
-            'password' => bcrypt('password123'),
-        ]);
+        // Crear usuario administrador si no existe
+        if (!User::where('email', 'admin@restaurante.com')->exists()) {
+            User::create([
+                'name' => 'Admin',
+                'email' => 'admin@restaurante.com',
+                'password' => bcrypt('Admin123!'),
+            ]);
+            echo "Usuario admin creado exitosamente\n";
+        } else {
+            echo "Usuario admin ya existe\n";
+        }
 
         // Crear categorías
         $platos = Categoria::create([

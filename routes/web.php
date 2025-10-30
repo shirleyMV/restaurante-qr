@@ -10,6 +10,21 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Ruta temporal para crear usuario admin
+Route::get('/crear-admin-temporal', function () {
+    if (\App\Models\User::where('email', 'admin@restaurante.com')->exists()) {
+        return 'Usuario admin ya existe';
+    }
+    
+    \App\Models\User::create([
+        'name' => 'Admin',
+        'email' => 'admin@restaurante.com',
+        'password' => bcrypt('Admin123!'),
+    ]);
+    
+    return 'Usuario admin creado exitosamente. Ahora puedes acceder a /admin con email: admin@restaurante.com y password: Admin123!';
+});
+
 // Rutas del Cliente (escanear QR y hacer pedidos)
 Route::prefix('cliente')->name('cliente.')->group(function () {
     // Ver menú escaneando QR

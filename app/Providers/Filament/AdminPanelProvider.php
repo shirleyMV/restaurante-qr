@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('Restaurante Doña Julia')
+            ->locale('es')
             ->colors([
                 'primary' => Color::Orange,
             ])

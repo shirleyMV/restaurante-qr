@@ -1,2 +1,6 @@
-*
+# Permitir imágenes de productos
+!*.jpg
+!*.jpeg
+!*.png
+!*.webp
 !.gitignore

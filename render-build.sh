@@ -8,6 +8,9 @@ composer install --no-dev --optimize-autoloader --no-interaction
 echo "🗄️ Ejecutando migraciones..."
 php artisan migrate --force --no-interaction
 
+echo "🌱 Cargando datos iniciales (productos, usuarios, mesas)..."
+php artisan db:seed --force --no-interaction
+
 echo "⚡ Optimizando..."
 php artisan config:cache
 php artisan route:cache

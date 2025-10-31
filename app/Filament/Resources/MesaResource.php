@@ -11,10 +11,48 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MesaResource extends Resource
 {
+    /**
+     * Cajera y admin pueden ver mesas
+     */
+    public static function canViewAny(): bool
+    {
+        return auth()->check();
+    }
+
+    /**
+     * Cajera y admin pueden crear mesas
+     */
+    public static function canCreate(): bool
+    {
+        return auth()->check();
+    }
+
+    /**
+     * Cajera y admin pueden editar mesas
+     */
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->check();
+    }
+
+    /**
+     * Solo administradores pueden eliminar
+     */
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()->esAdministrador();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return auth()->user()->esAdministrador();
+    }
+
     protected static ?string $model = Mesa::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-table-cells';

@@ -9,7 +9,12 @@ class Cliente extends Model
     protected $fillable = [
         'nombre',
         'correo',
-        'telefono'
+        'telefono',
+        'activo'
+    ];
+
+    protected $casts = [
+        'activo' => 'boolean',
     ];
 
     // Relación: Un cliente puede tener muchos pedidos

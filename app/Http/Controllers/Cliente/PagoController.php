@@ -59,6 +59,8 @@ public function generarQrPago(Request $request)
             'monto' => $pedido->total,
             'simulado' => $resultado['simulado'] ?? false,
             'message' => $resultado['message'],
+            'comprobante_url' => route('comprobante.show', $pedido->id),
+            'pedido_id' => $pedido->id,
         ]);
     }
 
@@ -116,6 +118,7 @@ public function pagoEfectivo(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Pago registrado. Por favor acércate a caja para pagar.',
+        'comprobante_url' => route('comprobante.show', $pedido->id),
     ]);
 }
 }

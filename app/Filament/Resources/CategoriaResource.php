@@ -15,6 +15,14 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CategoriaResource extends Resource
 {
+    /**
+     * Solo administradores pueden ver este recurso
+     */
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->esAdministrador() ?? false;
+    }
+
     protected static ?string $model = Categoria::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';

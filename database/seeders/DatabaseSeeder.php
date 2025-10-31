@@ -16,13 +16,27 @@ class DatabaseSeeder extends Seeder
         // Crear usuario administrador si no existe
         if (!User::where('email', 'admin@restaurante.com')->exists()) {
             User::create([
-                'name' => 'Admin',
+                'name' => 'Administrador',
                 'email' => 'admin@restaurante.com',
                 'password' => bcrypt('Admin123!'),
+                'rol' => 'administrador',
             ]);
-            echo "Usuario admin creado exitosamente\n";
+            echo "Usuario administrador creado exitosamente\n";
         } else {
-            echo "Usuario admin ya existe\n";
+            echo "Usuario administrador ya existe\n";
+        }
+
+        // Crear usuario cajera si no existe
+        if (!User::where('email', 'cajera@restaurante.com')->exists()) {
+            User::create([
+                'name' => 'Cajera',
+                'email' => 'cajera@restaurante.com',
+                'password' => bcrypt('Cajera123!'),
+                'rol' => 'cajera',
+            ]);
+            echo "Usuario cajera creado exitosamente\n";
+        } else {
+            echo "Usuario cajera ya existe\n";
         }
 
         // Crear categorías
@@ -66,35 +80,45 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($productos as $prod) {
-            Producto::create([
-                'categoria_id' => $prod['categoria_id'],
-                'nombre' => $prod['nombre'],
-                'descripcion' => '',
-                'precio' => $prod['precio'],
-                'imagen' => $prod['imagen'],
-                'disponible' => true
-            ]);
+            Producto::firstOrCreate(
+                ['nombre' => $prod['nombre']],
+                [
+                    'categoria_id' => $prod['categoria_id'],
+                    'descripcion' => '',
+                    'precio' => $prod['precio'],
+                    'imagen' => $prod['imagen'],
+                    'disponible' => true
+                ]
+            );
         }
 
-        // Crear mesas
-        for ($i = 1; $i <= 10; $i++) {
-            $mesa = Mesa::create([
-                'numero' => (string)$i,
-                'capacidad' => rand(2, 6),
-                'estado' => 'disponible',
-            ]);
-            
-            $mesa->generarCodigoQr();
+        // Crear mesas solo si no existen
+        if (Mesa::count() == 0) {
+            for ($i = 1; $i <= 10; $i++) {
+                $mesa = Mesa::create([
+                    'numero' => (string)$i,
+                    'capacidad' => rand(2, 6),
+                    'estado' => 'disponible',
+                ]);
+                
+                $mesa->generarCodigoQr();
+            }
+            echo "Mesas creadas exitosamente\n";
+        } else {
+            echo "Las mesas ya existen\n";
         }
 
-        // Crear métodos de pago
+        // Crear métodos de pago solo si no existen
         $metodos = [
             ['nombre' => 'Efectivo'],
             ['nombre' => 'QR'],
         ];
 
         foreach ($metodos as $metodo) {
-            MetodoPago::create($metodo);
+            MetodoPago::firstOrCreate(
+                ['nombre' => $metodo['nombre']],
+                ['activo' => true]
+            );
         }
     }
 }

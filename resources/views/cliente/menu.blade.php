@@ -51,14 +51,28 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($categoria->productos as $producto)
-                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                    <div class="h-40 bg-gradient-to-br from-orange-200 to-red-200 flex items-center justify-center">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow {{ $producto->stock <= 0 ? 'opacity-75' : '' }}">
+                    <div class="h-40 bg-gradient-to-br from-orange-200 to-red-200 flex items-center justify-center relative">
                         @if($producto->imagen)
                             <img src="{{ asset('imagenes/' . $producto->imagen) }}" 
                                  alt="{{ $producto->nombre }}"
-                                 class="w-full h-full object-cover">
+                                 class="w-full h-full object-cover {{ $producto->stock <= 0 ? 'grayscale' : '' }}">
                         @else
                             <i class="fas fa-utensils text-6xl text-orange-400"></i>
+                        @endif
+                        
+                        @if($producto->stock <= 0)
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                <span class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                                    AGOTADO
+                                </span>
+                            </div>
+                        @elseif($producto->stock <= 5)
+                            <div class="absolute top-2 right-2">
+                                <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    ¡Solo {{ $producto->stock }}!
+                                </span>
+                            </div>
                         @endif
                     </div>
                     
@@ -70,12 +84,21 @@
                             <span class="text-2xl font-bold text-orange-600">
                                 Bs {{ number_format($producto->precio, 2) }}
                             </span>
-                            <button 
-                                @click="agregarAlCarrito({{ $producto->id }}, '{{ $producto->nombre }}', {{ $producto->precio }})"
-                                class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2">
-                                <i class="fas fa-plus"></i>
-                                Agregar
-                            </button>
+                            @if($producto->stock > 0)
+                                <button 
+                                    @click="agregarAlCarrito({{ $producto->id }}, '{{ $producto->nombre }}', {{ $producto->precio }}, {{ $producto->stock }})"
+                                    class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2">
+                                    <i class="fas fa-plus"></i>
+                                    Agregar
+                                </button>
+                            @else
+                                <button 
+                                    disabled
+                                    class="bg-gray-400 text-white px-4 py-2 rounded-lg cursor-not-allowed flex items-center gap-2">
+                                    <i class="fas fa-ban"></i>
+                                    No disponible
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -256,6 +279,12 @@ function menuApp() {
         },
 
         aumentarCantidad(index) {
+            const item = this.carrito[index];
+            // Verificar si hay stock suficiente
+            if (item.cantidad >= item.stockDisponible) {
+                alert(`❌ Stock insuficiente\n\nProducto: ${item.nombre}\nStock disponible: ${item.stockDisponible} unidades`);
+                return;
+            }
             this.carrito[index].cantidad++;
         },
 
@@ -312,7 +341,18 @@ function menuApp() {
                     // Redirigir a la página de pago
                     window.location.href = '/cliente/pago/' + data.pedido.id;
                 } else {
-                    alert('Error al enviar el pedido: ' + data.message);
+                    // Manejar error de stock insuficiente
+                    if (data.productos_insuficientes) {
+                        let mensaje = 'Stock insuficiente:\n\n';
+                        data.productos_insuficientes.forEach(p => {
+                            mensaje += `• ${p.nombre}: Solicitaste ${p.solicitado}, solo hay ${p.disponible} disponibles\n`;
+                        });
+                        alert(mensaje);
+                        // Recargar la página para actualizar el stock mostrado
+                        window.location.reload();
+                    } else {
+                        alert('Error al enviar el pedido: ' + data.message);
+                    }
                 }
             } catch (error) {
                 alert('Error de conexión');

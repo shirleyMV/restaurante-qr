@@ -12,6 +12,43 @@ use Filament\Tables\Table;
 
 class ClienteResource extends Resource
 {
+    /**
+     * Administradores y cajeras pueden ver clientes
+     */
+    public static function canViewAny(): bool
+    {
+        return auth()->check();
+    }
+
+    /**
+     * Cajera y admin pueden crear clientes
+     */
+    public static function canCreate(): bool
+    {
+        return auth()->check();
+    }
+
+    /**
+     * Cajera y admin pueden editar clientes
+     */
+    public static function canEdit($record): bool
+    {
+        return auth()->check();
+    }
+
+    /**
+     * Solo administradores pueden eliminar
+     */
+    public static function canDelete($record): bool
+    {
+        return auth()->user()?->esAdministrador() ?? false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return auth()->user()?->esAdministrador() ?? false;
+    }
+
     protected static ?string $model = Cliente::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
@@ -67,11 +104,11 @@ class ClienteResource extends Resource
                     ->searchable()
                     ->icon('heroicon-o-envelope'),
                     
-                Tables\Columns\TextColumn::make('pedidos_count')
-                    ->label('Pedidos')
-                    ->counts('pedidos')
-                    ->badge()
-                    ->color('success'),
+                // Tables\Columns\TextColumn::make('pedidos_count')
+                //     ->label('Pedidos')
+                //     ->counts('pedidos')
+                //     ->badge()
+                //     ->color('success'),
                     
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Registrado')

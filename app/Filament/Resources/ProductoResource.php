@@ -14,6 +14,14 @@ use Filament\Tables\Columns\ViewColumn;
 
 class ProductoResource extends Resource
 {
+    /**
+     * Solo administradores pueden ver este recurso
+     */
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->esAdministrador() ?? false;
+    }
+
     protected static ?string $model = Producto::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
@@ -50,6 +58,14 @@ class ProductoResource extends Resource
                 ->prefix('Bs')
                 ->minValue(0)
                 ->step(0.01),
+                
+            Forms\Components\TextInput::make('stock')
+                ->label('Stock Disponible')
+                ->required()
+                ->numeric()
+                ->minValue(0)
+                ->default(0)
+                ->helperText('Cantidad disponible del producto'),
                 
             Forms\Components\FileUpload::make('imagen')
                 ->label('Imagen del Producto')
@@ -101,6 +117,17 @@ public static function table(Table $table): Table
                 ->sortable()
                 ->weight('bold')
                 ->color('success'),
+                
+            Tables\Columns\TextColumn::make('stock')
+                ->label('Stock')
+                ->sortable()
+                ->badge()
+                ->color(fn (int $state): string => match (true) {
+                    $state === 0 => 'danger',
+                    $state <= 5 => 'warning',
+                    default => 'success',
+                })
+                ->formatStateUsing(fn (int $state): string => $state === 0 ? 'AGOTADO' : $state . ' unidades'),
                 
             Tables\Columns\IconColumn::make('disponible')
                 ->label('Disponible')

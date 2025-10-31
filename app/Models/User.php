@@ -23,6 +23,7 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'rol',
     ];
 
     /**
@@ -51,5 +52,21 @@ class User extends Authenticatable implements FilamentUser
     {
         // Permitir acceso a todos los usuarios autenticados
         return true;
+    }
+
+    /**
+     * Verificar si el usuario es administrador
+     */
+    public function esAdministrador(): bool
+    {
+        return $this->rol === 'administrador';
+    }
+
+    /**
+     * Verificar si el usuario es cajera
+     */
+    public function esCajera(): bool
+    {
+        return $this->rol === 'cajera';
     }
 }

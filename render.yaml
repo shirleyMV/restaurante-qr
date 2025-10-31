@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: restaurante-qr
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: restaurante-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: restaurante-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: restaurante-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: restaurante-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: restaurante-db
+          property: password
+      - key: BROADCAST_DRIVER
+        value: reverb
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+
+databases:
+  - name: restaurante-db
+    databaseName: restaurante_qr
+    plan: free

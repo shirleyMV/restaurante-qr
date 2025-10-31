@@ -12,12 +12,36 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\ExportBulkAction;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PedidoResource extends Resource
 {
+    /**
+     * Administradores y cajeras pueden ver pedidos
+     */
+    public static function canViewAny(): bool
+    {
+        return auth()->check();
+    }
+
+    /**
+     * Solo administradores pueden eliminar
+     */
+    public static function canDelete(Model $record): bool
+    {
+        // Solo administradores pueden eliminar
+        return auth()->user()->esAdministrador();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        // Solo administradores pueden eliminar
+        return auth()->user()->esAdministrador();
+    }
+
     protected static ?string $model = Pedido::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
@@ -196,23 +220,21 @@ class PedidoResource extends Resource
                         default => 'gray',
                     }),
                     
-                Tables\Columns\BadgeColumn::make('estado')
+                Tables\Columns\SelectColumn::make('estado')
                     ->label('Estado')
-                    ->colors([
-                        'warning' => 'pendiente',
-                        'primary' => 'en_preparacion',
-                        'info' => 'listo',
-                        'success' => 'entregado',
-                        'danger' => 'cancelado',
-                    ])
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->options([
                         'pendiente' => 'Pendiente',
                         'en_preparacion' => 'En Preparación',
                         'listo' => 'Listo',
                         'entregado' => 'Entregado',
                         'cancelado' => 'Cancelado',
-                        default => $state,
-                    }),
+                    ])
+                    ->selectablePlaceholder(false),
+                    
+                Tables\Columns\ToggleColumn::make('activo')
+                    ->label('Activo')
+                    ->onColor('success')
+                    ->offColor('danger'),
                     
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha')
@@ -257,6 +279,20 @@ class PedidoResource extends Resource
                     })
                     ->requiresConfirmation()
                     ->color('primary'),
+                    
+                Tables\Actions\Action::make('toggle_activo')
+                    ->label(fn ($record) => $record->activo ? 'Desactivar' : 'Activar')
+                    ->icon(fn ($record) => $record->activo ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn ($record) => $record->activo ? 'danger' : 'success')
+                    ->action(function ($record) {
+                        $record->update(['activo' => !$record->activo]);
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading(fn ($record) => $record->activo ? 'Desactivar Pedido' : 'Activar Pedido')
+                    ->modalDescription(fn ($record) => $record->activo ? '¿Estás seguro de desactivar este pedido?' : '¿Estás seguro de activar este pedido?'),
+                    
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn () => auth()->user()->esAdministrador()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

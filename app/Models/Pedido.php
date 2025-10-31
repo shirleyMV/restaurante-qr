@@ -12,12 +12,14 @@ class Pedido extends Model
         'total',
         'estado',
         'metodo_pago',
-        'fecha_pedido'
+        'fecha_pedido',
+        'activo'
     ];
 
     protected $casts = [
         'total' => 'decimal:2',
         'fecha_pedido' => 'datetime',
+        'activo' => 'boolean',
     ];
 
     // Relación: Un pedido pertenece a una mesa
